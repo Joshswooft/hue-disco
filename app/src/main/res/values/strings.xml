@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Hue Disco</string>
     <string name="enter_ip_address">Please enter the IP address of your Hue Bridge device</string>
+    <string name="ip_address_placeholder">192.168.0.1</string>
+    <string name="ip_address_submit_btn">Connect to bridge</string>
 </resources>
