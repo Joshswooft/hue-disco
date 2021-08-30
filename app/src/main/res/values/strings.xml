@@ -3,4 +3,7 @@
     <string name="enter_ip_address">Please enter the IP address of your Hue Bridge device</string>
     <string name="ip_address_placeholder">192.168.0.1</string>
     <string name="ip_address_submit_btn">Connect to bridge</string>
+    <string name="pref_file_key">SharedPref</string>
+    <string name="bridgeId_key"></string>
+    <string name="bridge_connected">Connected to Hue Bridge</string>
 </resources>

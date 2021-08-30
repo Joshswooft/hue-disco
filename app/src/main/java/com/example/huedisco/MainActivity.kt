@@ -1,7 +1,10 @@
 package com.example.huedisco
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.Response
@@ -24,6 +27,8 @@ import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSession
 import com.android.volley.toolbox.HurlStack
+import org.json.JSONArray
+import org.json.JSONObject
 import java.net.URL
 
 import java.net.HttpURLConnection
@@ -36,9 +41,31 @@ class MainActivity : AppCompatActivity() {
                 "((25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])){0,1}$"
     )
 
+    private fun loadBridgeId(): String? {
+        var sharedPref: SharedPreferences = getSharedPreferences(getString(R.string.pref_file_key), Context.MODE_PRIVATE)
+        return sharedPref.getString(getString(R.string.bridgeId_key), "")
+    }
+
+    private fun saveBridgeId(id: String) {
+        // TODO: use encrypted store for better security: https://developer.android.com/reference/androidx/security/crypto/EncryptedSharedPreferences
+        var sharedPref: SharedPreferences = getSharedPreferences(getString(R.string.pref_file_key), Context.MODE_PRIVATE)
+
+        with (sharedPref.edit()) {
+            putString(getString(R.string.bridgeId_key), id)
+            apply()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val bridgeID = loadBridgeId()
+        if (bridgeID != null) {
+            Log.d("BridgeID", bridgeID)
+//            TODO: if we already have a bridgeId and a username then skip straight to the main screen.
+            Toast.makeText(this, getString(R.string.bridge_connected), Toast.LENGTH_SHORT).show()
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -120,24 +147,33 @@ class MainActivity : AppCompatActivity() {
 
         val url = "https://$ip/api/12345/config"
 
-//        val url = "https://pokeapi.co/api/v2/ability/7/"
         val queue = Volley.newRequestQueue(this, hurlStack)
         Log.d("queue",  "created new request queue")
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.GET, url, null,
-            Response.Listener { response ->
-                Log.d("Response: ", response.toString())
+            { response ->
+                var strResp = response.toString()
+                Log.d("Bridge Response: ", strResp)
+//                TODO: response may contain several bridges, for now just accept 1st one.
+                val jsonObj: JSONObject = JSONObject(strResp)
+                val bridgeId: String = jsonObj.getString("bridgeid")
+                if (bridgeId.isNotEmpty()) {
+                    Toast.makeText(this, getString(R.string.bridge_connected), Toast.LENGTH_SHORT).show()
+                    saveBridgeId(bridgeId)
+                }
+                else {
+                    // TODO: handle no bridges
+                    Log.e("Bridge Response: ", "Bridge not found")
+                }
             },
-            Response.ErrorListener { error ->
-                // TODO: Handle error
+            { error ->
                 Log.d("Error: ", error.toString())
             }
         )
 
         queue.add(jsonObjectRequest)
 
-//        TODO: connect to bridge
-//        TODO: if successful then go to next page
+
     }
 
 
