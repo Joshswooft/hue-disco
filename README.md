@@ -4,7 +4,7 @@ A kotlin app that controls hue lights and syncs them to spotify music.
 
 ## Roadmap:
 
-- [ ] Connect to Hue bridge
+- [X] Connect to Hue bridge
 - [ ] Device(s) setup/management
 - [ ] Light configuration
 - [ ] Sync to music  
